@@ -1,0 +1,38 @@
+.table {
+    background-color: greenyellow;
+    width: 100vh;
+    height: 90vh;
+    border-radius: 8%;
+    margin: 0 auto;
+    border: 2px solid black;
+}
+
+.player, .buttons {
+    position: relative;
+    top: 25%;
+    margin-bottom: 10px;;
+}
+
+.buttons {
+    text-align: center;
+}
+
+.player-name {
+    margin-left: 40px;
+}
+
+.hand img {
+    height: 150px;
+    width: auto;
+    margin: 20px
+}
+
+#dealer-hand, #player-hand {
+    height: 200px;
+    background-color: rgba(208, 250, 144, 0.76);
+    margin: 0 40px;
+}
+
+#replay-button {
+    text-align: center;
+}
