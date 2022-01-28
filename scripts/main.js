@@ -1,6 +1,80 @@
 window.addEventListener('DOMContentLoaded', function () {
   // Execute after page load
 
+  class Card {
+    constructor(rank, suit) {
+        this.rank = rank;
+        this.suit = suit;
+    }
+  }
+  
+  Card.prototype.getImageUrl = () => {
+    return `images/${this.rank}_of_${this.suit}.png`;
+  }
+  
+  class Hand {
+  
+    constructor() {
+        this.handOfCards = []
+    }
+  
+    addCard(card) { this.handOfCards.push(card);}
+    getPoints() {
+        let total = this.handOfCards
+            .map(card =>{ 
+              return card.rank
+            })
+            .reduce((prev, curr) => {
+                console.log("before", prev, curr)
+                if (curr > 10) curr = 10;
+                console.log("after", prev, curr)
+                return prev + curr;
+            })
+  
+        return total;
+    }
+  
+  
+  }
+  
+  class Deck {
+  
+    constructor() {
+        this.deck = [];
+    }
+  
+    buildDeck() {
+        let suits = ['diamonds', 'clubs', 'hearts', 'spades'];
+  
+        for (let i = 0; i < suits.length; i++) {
+          let suit = suits[i];
+  
+          for (let j = 1; j <= 13; j++) {
+            this.deck.push(new Card(j, suit));
+          }
+        }
+  
+    }
+  
+    draw() {
+        if (this.deck.length === 0 ) this.buildDeck();
+        let card = this.getRandomCard()[0];
+        return card;
+    
+    }
+  
+    getRandomCard() {
+        let randIdx = Math.floor(Math.random() * this.deck.length);
+        let randCard = this.deck.splice(randIdx, 1);
+        return randCard;
+    }
+  
+    numCardsLeft() {
+        return this.deck.length;
+    }
+  
+  }
+
   // Buttons
   let dealBtn = document.getElementById("deal-button");
   let hitBtn = document.getElementById("hit-button");
@@ -12,50 +86,38 @@ window.addEventListener('DOMContentLoaded', function () {
   let playerHandElement = document.getElementById("player-hand");
   let dealerPointDisplay = document.getElementById("dealer-points");
   let playerPointDisplay = document.getElementById("player-points");
-  replayBtn.style.display = "none";
   let message = document.getElementById("messages");
-
+  
   // variables
   let deck;
   let dealerPoints;
   let playerPoints;
   let dealerNot17orMore = false;
   let playerStand = false;
-  let dealerHand = [];
-  let playerHand = [];
-
-  const buildDeck = () => {
-    let deck = [];
-    let suits = ['diamonds', 'clubs', 'hearts', 'spades'];
-
-    for (let i = 0; i < suits.length; i++) {
-      let suit = suits[i];
-
-      for (let j = 1; j <= 13; j++) {
-        deck.push({ rank: j, suit });
-      }
-    }
-
-    return deck;
-  }
+  let dealerHand = new Hand();
+  let playerHand = new Hand();
+  
+  // hide replay button
+  replayBtn.style.display = "none";
 
   //build deck on start
-  deck = buildDeck();
+  deck = new Deck();
+  deck.buildDeck();
 
   const dealCard = (player) => {
 
-    let randIndex = Math.floor(Math.random() * deck.length);
-    let getRandomCardFromDeck = deck.splice(randIndex, 1);
-    let card = getCardImage(getRandomCardFromDeck[0]);
+    // let randIndex = Math.floor(Math.random() * deck.length);
+    let getRandomCardFromDeck = deck.draw();
+    let card = getCardImage(getRandomCardFromDeck);
 
     switch (player) {
       case 'player':
-        playerHand.push(getRandomCardFromDeck[0]);
+        playerHand.addCard(getRandomCardFromDeck);
         playerHandElement.appendChild(card);
         calculatePoints('player', playerHand);
         break;
       case 'dealer':
-        dealerHand.push(getRandomCardFromDeck[0]);
+        dealerHand.addCard(getRandomCardFromDeck);
         dealerHandElement.appendChild(card);
         calculatePoints('dealer', dealerHand);
         break;
@@ -98,33 +160,18 @@ window.addEventListener('DOMContentLoaded', function () {
 
     switch (player) {
       case 'player':
-        playerPoints = pointTally(playerHand);
+        playerPoints = playerHand.getPoints();
         checkForBusts(playerPoints);
         playerPointDisplay.innerHTML = playerPoints;
         break;
       case 'dealer':
-        dealerPoints = pointTally(dealerHand);
+        dealerPoints = dealerHand.getPoints();
         dealerNot17orMore = dealerPoints >= 17;
         checkForBusts(dealerPoints);
         dealerPointDisplay.innerHTML = dealerPoints;
         break;
 
     }
-  }
-
-  const pointTally = (playerHand) => {
-
-    let totalPoints;
-
-    totalPoints = playerHand
-      .map(card => card.rank)
-      .reduce((prev, curr) => {
-        if (prev > 10) prev = 10;
-        if (curr > 10) curr = 10;
-        return prev + curr;
-      });
-
-    return totalPoints;
   }
 
   const determineWinner = () => {
@@ -149,7 +196,7 @@ window.addEventListener('DOMContentLoaded', function () {
   });
 
   hitBtn.addEventListener("click", () => {
-    if (!playerStand) {
+    if (!playerStand ) {
       dealCard('player');
     }
   });
@@ -171,8 +218,8 @@ window.addEventListener('DOMContentLoaded', function () {
   })
 
   replayBtn.addEventListener("click", () => {
-    playerHand = [];
-    dealerHand = [];
+    playerHand = new Hand();
+    dealerHand = new Hand();
     playerStand = false;
     dealerNot17orMore = true;
     totalPoints = 0;
@@ -182,7 +229,7 @@ window.addEventListener('DOMContentLoaded', function () {
     hitBtn.style.display = "inline";
     standBtn.style.display = "inline";
 
-    deck = buildDeck();
+    let newBuild = new Deck();
     removeAllChildNodes(dealerHandElement);
     removeAllChildNodes(playerHandElement);
     dealerPointDisplay.innerHTML = "";
