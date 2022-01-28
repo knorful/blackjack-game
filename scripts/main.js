@@ -22,12 +22,13 @@ window.addEventListener('DOMContentLoaded', function () {
     getPoints() {
         let total = this.handOfCards
             .map(card =>{ 
-              return card.rank
+              if (card.rank > 10 ) {
+                card.rank = 10;
+              }
+
+              return card.rank;
             })
             .reduce((prev, curr) => {
-                console.log("before", prev, curr)
-                if (curr > 10) curr = 10;
-                console.log("after", prev, curr)
                 return prev + curr;
             })
   
@@ -166,8 +167,8 @@ window.addEventListener('DOMContentLoaded', function () {
         break;
       case 'dealer':
         dealerPoints = dealerHand.getPoints();
-        dealerNot17orMore = dealerPoints >= 17;
         checkForBusts(dealerPoints);
+        dealerNot17orMore = dealerPoints >= 17;
         dealerPointDisplay.innerHTML = dealerPoints;
         break;
 
